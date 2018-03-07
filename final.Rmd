@@ -1,0 +1,218 @@
+---
+title: "Crypto Currencies Analysis"
+author: "Chinmay Gupta"
+date: "30 January 2018"
+email: "chinmay.gupta2009@gmail.com"
+college: "Jaypee University of Engineering and Technology,Guna"
+output: html_document
+---
+ 1. Introduction 
+
+A crypto currency is a digital currency designed to work as a medium of exchange that uses cryptography to secure its transactions, to control the creation of additional units, and to verify the transfer of currencies.  Cryptocurrencies use decentralized control as opposed to centralized electronic money and central banking systems.Decentralized cryptocurrency is produced by the entire cryptocurrency system collectively, at a rate which is defined when the system is created and which is publicly known. In case of decentralized cryptocurrency, companies or governments cannot produce new units, and have not so far provided backing for other firms, banks or corporate entities which hold asset value measured in it. 
+
+
+ 2. Overview 
+
+Bitcoin, created in 2009, was the first decentralized cryptocurrency.As of September 2017, over a thousand cryptocurrency specifications exist; most are similar to and derive from the first fully implemented decentralized cryptocurrency, bitcoin. Most cryptocurrencies are designed to gradually decrease production of currency, placing an ultimate cap on the total amount of currency that will ever be in circulation.cryptocurrencies can be more difficult for seizure by law enforcement. This difficulty is derived from leveraging cryptographic technologies.
+
+3. Architecture 
+
+ Blockchain 
+
+A blockchain is a continuously growing list of records, called blocks, which are linked and secured using cryptography. Each block typically contains a hash pointer as a link to a previous block, a timestamp and transaction data. By design, blockchains are inherently resistant to modification of the data. The validity of each cryptocurrency's coins is provided by a blockchain.
+
+ Timestamping
+Cryptocurrencies use various timestamping schemes to avoid the need for a trusted third party to timestamp transactions added to the blockchain ledger.
+
+
+
+ 4. Study of a few crypto currencies' everyday's price details.  
+ 
+  Overview 
+ 
+ the main aim of this study was to perform a detail analysis of crypto currencies prices all across the globe and to construct a model that will describe the price trends over a long period of time.crypto currencies are in demand at a rate faster than they were ever before. bitcoin, the first ever crytpo currency raised by 171% in the year 2017 itself and has risen by 20566% in the year 2010.
+ 
+  Data 
+  for this study  the data was collected from kaggle (https://www.kaggle.com/jessevent/all-crypto-currencies).
+  this data set contains 5572 observations over 12 variables.data description is as follows :
+  slug         : name of the crypto currency
+  symbol       : symbol used to the respective crypto currency.
+  name         : name of crypto currency.
+  ranknow      : current rank of crypto currency in the world.
+  open         : opening price of the day.
+  high         : peak price of the day.
+  low          : least price of the day.
+  close        : closing price of the day.
+  market       : volume currently in circulation in market.
+  close_ration : daily close rate, min-maxed with the high and low values for the day.
+  spread       : difference between the high and low values for the day.
+  
+
+reading the data set:
+```{r}
+coin.df <- read.csv(paste("crypto-markets.csv"),sep=",")
+dim(coin.df)
+```
+there are 670420 rows containing the details of all crypto currencies available till date.
+
+List of all the crypto currencies available in the world.
+ 
+```{r}
+table(coin.df$slug)
+```
+
+minimum open value of all the coins
+
+```{r}
+aggregate(coin.df$open,by=list(coin.df$slug),min)
+```
+
+
+maximum open value of all the coins
+
+```{r}
+aggregate(coin.df$open,by=list(coin.df$slug),max)
+```
+
+
+min close value of all the coins
+
+```{r}
+aggregate(coin.df$close,by=list(coin.df$slug),min)
+```
+
+
+maximum close value of all the coins
+
+```{r}
+aggregate(coin.df$close,by=list(coin.df$slug),max)
+
+```
+
+one way contigency table
+```{r}
+table(coin.df$slug)
+```
+
+
+two way contigency table
+```{r}
+library(gmodels)
+CrossTable(coin.df$slug,coin.df$ranknow)
+```
+the bitcoin is ranked no. 1 follwed by ethereum.
+
+boxplot of open prices of coins
+```{r}
+boxplot(coin.df$open~coin.df$slug)
+```
+as we can see there is no grouping of the opening prices for the crypto coin "dash". it is due to it's highle diverse opening on a regular basis.let us see for closing prices.
+
+
+boxplot of closing prices of coins
+```{r}
+boxplot(coin.df$close~coin.df$slug)
+```
+similar is the case for closing prices also. the closing pricess of "dash" doesn't fit in any region. while on the other hand we can see the from the above box plot that bitcoin for most of time has remained in a fixed range and had a sudden jump to a high opening and closing price.
+
+
+ let us have a look on the difference between highs and low of the day for a crypto coin.
+```{r}
+boxplot(coin.df$spread~coin.df$slug)
+```
+ the difference between highest ond lowest price for the day of any crypto currency is very less as compared to there high and low prices.
+ 
+ 
+ histograms for suitable data fields.
+```{r}
+hist(coin.df$open,main="opening values of crypto currencies.",xlab="open",ylab = "no. of time.")
+hist(coin.df$close,main="closing  values of crypto currencies.",xlab="close",ylab = "no. of time.")
+hist(coin.df$high,main="maximum values of crypto currencies.",xlab="max value",ylab = "no. of time.")
+hist(coin.df$low,main="minimum values of crypto currencies.",xlab="min value",ylab = "no. of time.")
+hist(coin.df$close_ratio,main = "histogram for close ratio",xlab="close_ratio")
+```
+ 
+we can see the there is no significant differences between the opening and closing prces of crypto currencies.
+
+
+
+
+
+scatter plot:
+```{r}
+library(car)
+scatterplotMatrix(formula= ~open+high+low+spread+close, data=coin.df,diagonal="histogram",cex=0.1)
+```
+
+
+correlation matrix.
+
+```{r}
+library(corrgram)
+corrgram(coin.df[,c(5,6,7,8,11,12)],order = TRUE, lower.panel=panel.shade,upper.panel=panel.pie, text.panel=panel.txt)
+```
+
+
+generating correlation matrix :
+```{r}
+cor(coin.df[,c(5,6,7,8,12)])
+```
+  Model 
+
+we proposed the following null hypothesis :
+
+null hypothesis : there is no significant relation between change in daily price and number of corresponding coins in market.
+
+```{r}
+fit  <- lm(coin.df$spread~ coin.df$market)
+summary(fit)
+```
+we can see that since the p-value is less than 0.05 we can reject the null hypothesis. this means that the change in price of crypto-currencies is highly correlated on the number of crypto currencies floating in the market.
+
+```{r}
+fit1  <- lm(coin.df$spread~ coin.df$close_ratio+coin.df$open+coin.df$close+coin.df$market)
+summary(fit1)
+```
+
+getting confidence interval :-
+
+```{r}
+confint(fit1)
+```
+
+getting coefficients :
+
+```{r}
+coefficients(fit1)
+```
+
+
+ Results 
+ 
+from the above coefficients we can formulate the regression model for the given data , "spread" beong the dependent variable and rest being the independent variable.
+
+spread = -3.19 + 2.872 x close_ration + 0.181 x open -0.0966 x close + 3.3 x x10^-10 x market
+
+
+
+  Coclusion 
+
+-we can see from the given data set that price of crypto currencies are highly dependent on the volume floating in the market. 
+
+-data set provides us the top 8 crypto currencies with "bitcoin" at the top followed by "ethereum" followed by "ripple" and so on.
+
+
+- the price of crypto currencies is also dependent on the opening and closing of the price of the day.
+
+-the high and low values are the peak values of the day for the crypto currencies and Close ratio is the daily close rate, min-maxed with the high and low values for the day.
+
+
+
+ Table statistics
+
+```{r}
+summary(coin.df)
+```
+
+
+
